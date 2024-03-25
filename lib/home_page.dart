@@ -1,14 +1,17 @@
+import 'package:another_transformer_page_view/another_transformer_page_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_carousel_slider/carousel_slider.dart';
+import 'package:matrimony_bihebari/details.dart';
+import 'package:matrimony_bihebari/transformer.dart';
 
 import 'model.dart';
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
+//with AutomaticKeepAliveClientMixin<MyHomePage>
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Person> dummyData = [
@@ -71,105 +74,90 @@ class _MyHomePageState extends State<MyHomePage> {
   ];
 
   int currentIndex = 0;
-  late PageController _pageController;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _pageController = PageController(initialPage: currentIndex);
-  //   _pageController.addListener(() {
-  //     setState(() {
-  //       currentIndex = _pageController.page!.round();
-  //     });
-  //   });
-  // }
-
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: currentIndex);
-  }
 
   @override
   void dispose() {
-    _pageController.dispose();
     super.dispose();
   }
 
-  final _age = GlobalKey<State>();
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: CarouselSlider(
-          keepPage: true,
-          key: _age,
-          onSlideChanged: (index) {
-            setState(() {
-              currentIndex = index;
-              // _pageController.jumpToPage(index);
-            });
-          },
-          children: [
-            //container first
-            PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                itemCount: dummyData.length,
-                itemBuilder: (context, index) {
-                  return Stack(
-                    children: [
-                      Image.network(dummyData[index].imageUrl),
-                      Positioned(
-                          bottom: 0,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Name: ${dummyData[index].name}',
-                              ),
-                              Text(
-                                'Age: ${dummyData[index].age}',
-                              ),
-                              Text(
-                                'Occupation: ${dummyData[index].occupation}',
-                              ),
-                              Text(
-                                'Address: ${dummyData[index].place}',
-                              )
-                            ],
-                          ))
-                    ],
-                  );
-                }),
-            //container second
-            Container(
-              color: Colors.deepPurpleAccent,
-              child: Center(
-                child: Column(
-                  children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundImage:
-                          NetworkImage(dummyData[currentIndex].imageUrl),
+    //super.build(context);
+    return DefaultTabController(
+        length: 2,
+        animationDuration: Duration.zero,
+        child: Scaffold(
+          body: SafeArea(
+              child: TabBarView(children: [
+            _profile(),
+            Details(
+              imageUrl: dummyData[currentIndex].imageUrl,
+              name: dummyData[currentIndex].name,
+            ),
+          ])),
+        ));
+  }
+
+  Widget _profile() {
+    return SafeArea(
+        key: const PageStorageKey('value'),
+        child: TransformerPageView(
+            // controller: _pageController,
+            itemCount: dummyData.length,
+            scrollDirection: Axis.vertical,
+            curve: Curves.easeInBack,
+            transformer: MyTransformer(),
+            onPageChanged: (index) {
+              setState(() {
+                currentIndex = index ?? 0;
+              });
+            },
+            itemBuilder: (context, index) {
+              return Stack(
+                children: [
+                  Image.network(dummyData[index].imageUrl),
+                  Positioned(
+                    bottom: 0,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Name: ${dummyData[index].name}'),
+                        Text('Age: ${dummyData[index].age}'),
+                        Text('Occupation: ${dummyData[index].occupation}'),
+                        Text('Address: ${dummyData[index].place}'),
+                      ],
                     ),
-                    Text(
-                      'Name: ${dummyData[currentIndex].name}',
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    Text(
-                      'Age: ${dummyData[currentIndex].age}',
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                    Text(
-                      'Occupation: ${dummyData[currentIndex].occupation}',
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          ]),
-    );
+                  ),
+                ],
+              );
+            })
+
+        // PageView.builder(
+        //   controller: _pageController,
+        //   itemCount: dummyData.length,
+        //   scrollDirection: Axis.vertical,
+        //   onPageChanged: (index) {
+        //     setState(() {
+        //       currentIndex = index;
+        //     });
+        //   },
+        //   itemBuilder: (context, index) {
+        //     //final double horizontalOffset = (index - currentIndex) * 50;
+        //     final double verticalOffset = (index - currentIndex) * 50;
+
+        //     // Apply a custom transformation to each page
+        //     return TransformerPageView(
+
+        //         scrollDirection: Axis.vertical,
+        //         curve: Curves.easeInBack,
+
+        //         transformer: MyTransformer(),
+        //         itemCount: dummyData.length,
+        //         itemBuilder: (context, index) {
+        //           return
+        //         });
+        //   },
+        // ),
+        );
   }
 }
